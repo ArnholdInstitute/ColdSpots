@@ -1,0 +1,4 @@
+[submodule "TensorBox"]
+	path = TensorBox
+	url = https://github.com/ArnholdInstitute/TensorBox.git
+	branch = master
