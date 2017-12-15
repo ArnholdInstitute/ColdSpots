@@ -2,10 +2,6 @@
 	path = TensorBox
 	url = https://github.com/ArnholdInstitute/TensorBox.git
 	branch = master
-[submodule "ssd.pytorch"]
-	path = ssd.pytorch
-	url = https://github.com/ArnholdInstitute/ssd.pytorch.git
-	branch = master
 [submodule "faster_rcnn_pytorch"]
 	path = faster_rcnn_pytorch
 	url = https://github.com/ArnholdInstitute/faster_rcnn_pytorch.git
