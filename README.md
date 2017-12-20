@@ -1,5 +1,11 @@
-Cold Spots
-----------
+
+<h1 align="center">Cold Spots</h1>
+
+<p align="center">
+<a href="https://sinai-survey.tk">
+<img src="https://i.imgur.com/0ccpCe0.jpg" height="150" />
+</a>
+</p>
 
 This repository contains all code necessary to reproduce cold spot results.
 
