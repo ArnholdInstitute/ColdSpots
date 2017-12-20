@@ -19,6 +19,7 @@ git clone --recursive https://github.com/ArnholdInstitute/ColdSpots.git
 
 ```
 virtualenv venv
+source venv/bin/activate
 pip install -r requirements.txt
 ```
 
@@ -27,7 +28,7 @@ pip install -r requirements.txt
 Build the C++ auxilary functions:
 
 ```
-cd TensorBox/utils && make
+cd TensorBox/utils && make && cd ../../
 ```
 
 If you want to run on a GPU, you'll also need to `pip install tensorflow-gpu`.
