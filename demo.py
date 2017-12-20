@@ -7,9 +7,10 @@ from TensorBox.predict import TensorBox
 # Read in image (RGB format)
 img = imread('data/liberia_sample_940.jpg')
 
-# Reconstruct the model
+# Reconstruct the model, will automatically download weights
+model = TensorBox()
+
 description = json.load(open('weights/tensorbox/description.json'))
-model = TensorBox('weights/tensorbox/' + description['weights'])
 
 # Infer buildings
 result = model.predict_image(img, description['threshold'])
