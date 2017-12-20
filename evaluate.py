@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
-import os, json, argparse, pdb, numpy as np, pandas, time
+import torch, os, json, argparse, pdb, numpy as np, pandas, time
 from shapely.geometry import MultiPolygon, box
 from TensorBox.predict import TensorBox
+from faster_rcnn_pytorch.predict import FasterRCNN
 from subprocess import check_output
 from precision_recall import precision_recall
 from tqdm import tqdm
@@ -25,18 +26,6 @@ def get_results(args, model):
 
     return df
 
-def get_weights(model):
-    download_url = 'https://github.com/ArnholdInstitute/ColdSpots/releases/download/1.0/%s.zip'
-    if not os.path.exists('weights'):
-        os.mkdir('weights')
-    if not os.path.exists(os.path.join('weights', model)):
-        print('Downloading weights for %s' % model)
-        if not os.path.exists(os.path.join('weights', model + '.zip')):
-            check_output(['wget', download_url % model, '-O', os.path.join('weights', model + '.zip')])
-        print('Unzipping...')
-        check_output(['unzip', 'weights/%s.zip' % model, '-d', 'weights'])
-    return json.load(open('weights/%s/description.json' % model))
-
 def main():
     parser = argparse.ArgumentParser()    
     parser.add_argument('--test_boxes', required=True, help='Path to the JSON file containing the test set')
@@ -46,14 +35,6 @@ def main():
     parser.add_argument('--threshold', default=None, type=float, help='Confidence threshold (default is in description.json)')
     args = parser.parse_args()
 
-    description = get_weights(args.model)
-
-    if args.weights is None:
-        args.weights = os.path.join('weights/%s/%s' % (args.model, description['weights']))
-
-    if args.threshold is None:
-        args.threshold = description['threshold']
-
     os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu)
     
     if not os.path.exists('results'):
@@ -61,9 +42,16 @@ def main():
 
     model = None
     if args.model == 'tensorbox':
-        model = TensorBox(args.weights)
+        model = TensorBox(weights=args.weights)
+    elif args.model == 'faster-rcnn':
+        model = FasterRCNN(weights=args.weights)
     else:
         raise Exception('Model not recognized!')
+
+    description = json.load(open('weights/%s/description.json' % args.model))
+
+    if args.threshold is None:
+        args.threshold = description['threshold']
 
     df = get_results(args, model)
     df.to_csv('results/%s_predictions.csv' % args.model, index=False)
