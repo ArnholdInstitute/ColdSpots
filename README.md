@@ -63,3 +63,36 @@ cv2.imwrite('with_annotated_buildings.jpg', np.concatenate([orig, space, img], a
 ```
 
 ![Imgur](https://i.imgur.com/6mgiIGo.jpg)
+
+
+# Evaluating models
+
+In order to evaluate the models provided in this repo, you'll need to create a JSON file describing your validation data.  The JSON file must have the following structure:
+
+```JSON
+[
+  {
+    "rects": [
+      {
+        "y1": <float>,
+        "x2": <float>,
+        "x1": <float>,
+        "y2": <float>
+      },
+      ...
+    ],
+    "image_path": <path to file>
+  },
+  ...
+]
+```
+
+Each entry in the array must have a field called `image_path` which is the relative path (from the JSON file) to the image.  `rects` contains the top left (`x1`, `y1`) coordinate and the bottom right (`x2`, `y2`) coordinate for the bounding box of each building in the provided satellite image.
+
+You can then evaluate a model by running the following command:
+
+```
+./evaluate.py --test_boxes <path to JSON file>  --model <model>
+```
+
+Where model can be {`tensorbox`, `faster-rcnn`, `yolo`}
