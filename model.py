@@ -1,10 +1,11 @@
 import os, boto3, re, pdb, botocore, zipfile, json, importlib
-from db import conn
+from db import aigh_conn as conn
 
 MODELS = set([
     'TensorBox',
     'darkflow',
-    'faster_rcnn_pytorch'
+    'faster_rcnn_pytorch',
+    'ssd_pytorch'
 ])
 
 def get_best_model():
@@ -34,6 +35,6 @@ def get_best_model():
 
         description = json.load(open('weights/%s/description.json' % id))
         module = importlib.import_module(description['name'])
-        model_class = getattr(module, description['name'])
+        model_class = getattr(module, module.NAME)
         model = model_class(weights=os.path.join('weights', id, description['weights']))
         return model, id, description['threshold']

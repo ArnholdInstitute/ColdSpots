@@ -7,6 +7,7 @@ from precision_recall import precision_recall
 from tqdm import tqdm
 from model import MODELS
 from zipfile import ZipFile
+from db import aigh_conn
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 
@@ -40,11 +41,18 @@ def get_results(args, model):
     return df, summary
 
 def upload_model(args, summary):
+    with aigh_conn.cursor() as cur:
+        cur.execute("SELECT MAX(f1) FROM models WHERE name=%s", (summary['name'],))
+        best_score, = cur.fetchone()
+        if best_score and best_score > summary['f1']:
+            print('Not uploading because, a model already exists with f1 %f' % best_score)
+            return
+
     zip_file = args.model_class.zip_weights(args.weights, base_dir='weights')
     s3 = boto3.resource('s3')
     key = os.path.join('building-detection', os.path.basename(zip_file))
 
-    qargs = {k : summary[k] for k in ['name', 'id', 'precision', 'recall', 'threshold']}
+    qargs = {k : summary[k] for k in ['name', 'id', 'precision', 'recall', 'threshold', 'f1']}
     qargs['instance'] = '/'.join(args.weights.split('/')[-2:])
     qargs['s3_loc'] = os.path.join('s3://aigh-deep-learning-models/', key)
 
@@ -55,10 +63,10 @@ def upload_model(args, summary):
         host=os.environ.get('PGHOST', '')
     )
 
-    with conn.cursor() as cur:
+    with aigh_conn.cursor() as cur:
         cur.execute("""
-            INSERT INTO models(name, instance, id, tested_on, precision, recall, threshold, s3_loc)
-            VALUES (%(name)s, %(instance)s, %(id)s, now(), %(precision)s, %(recall)s, %(threshold)s, %(s3_loc)s)
+            INSERT INTO models(name, instance, id, tested_on, precision, recall, threshold, s3_loc, f1)
+            VALUES (%(name)s, %(instance)s, %(id)s, now(), %(precision)s, %(recall)s, %(threshold)s, %(s3_loc)s, %(f1)s)
         """, qargs)
 
         json.dump(summary, open('.summary.json', 'w'))
@@ -66,7 +74,7 @@ def upload_model(args, summary):
             z.write('.summary.json', '%s/description.json' % qargs['id'])
 
         s3.meta.client.upload_file(zip_file, 'aigh-deep-learning-models', key)
-        conn.commit()
+        aigh_conn.commit()
 
 def main():
     parser = argparse.ArgumentParser()    
@@ -85,7 +93,7 @@ def main():
     for model_type in MODELS:
         if model_type in args.weights:
             module = importlib.import_module(model_type)
-            args.model_class = getattr(module, model_type)
+            args.model_class = getattr(module, module.NAME)
             model = args.model_class(args.weights)
             model_id = args.model_class.mk_hash(args.weights)
 
@@ -93,7 +101,6 @@ def main():
         raise ValueError('Invalid model')
 
     df, summary = get_results(args, model)
-
     upload_model(args, summary)
 
 if __name__ == '__main__':
