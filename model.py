@@ -15,7 +15,7 @@ def get_best_model():
         cur.execute("""
             SELECT name, instance, id, s3_loc
             FROM models
-            ORDER BY 2 * (precision*recall) / (precision + recall) DESC
+            ORDER BY f1 DESC
             LIMIT 1
         """)
         name, instance, id, s3_loc = cur.fetchone()
