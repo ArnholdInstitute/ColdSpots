@@ -70,7 +70,7 @@ def infer_all(model, args):
 
     area_to_cover = None
     if args.boundary:
-        area_to_cover = shape(json.load(open(args.boundary)))
+        area_to_cover = shape(json.load(open(args.boundary))['geometry'])
 
     generator = InferenceGenerator(conn, args.country, area_to_cover=area_to_cover, data_dir=args.data_dir, threads=8)
     for orig_img, meta in generator:
