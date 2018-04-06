@@ -27,18 +27,19 @@ def get_best(annos, box):
     return best_rect
 
 def precision_recall(gt, predictions):
-    predictions = predictions[['x1', 'y1', 'x2', 'y2', 'score', 'image_id']].values
-    predictions = predictions[(-predictions[:, 4]).argsort()]
+    npos = sum(map(lambda x: len(x['rects']), gt))
 
+    gt_map = {x['image_path'] : x for x in gt}
+
+    predictions = predictions.sort_values(by='score', ascending=False)
     tp, fp = np.zeros(len(predictions)), np.zeros(len(predictions))
-    for i, (x1, y1, x2, y2, score, image_id) in enumerate(predictions):
-        best = get_best(gt[int(image_id)], (x1, y1, x2, y2))
+    for i, (_, row) in enumerate(predictions.iterrows()):
+        best = get_best(gt_map[row.image_id], (row.x1, row.y1, row.x2, row.y2))
         if best:
             tp[i] = 1
         else:
             fp[i] = 1
 
-    npos = sum(map(lambda x: len(x['rects']), gt))
 
     fp = np.cumsum(fp)
     tp = np.cumsum(tp)
