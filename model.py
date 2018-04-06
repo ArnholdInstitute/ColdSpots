@@ -5,8 +5,8 @@ MODELS = set([
     'TensorBox',
     'darkflow',
     'faster_rcnn_pytorch',
-    'ssd_pytorch'
-])
+    'retina_net'
+ ])
 
 def get_best_model():
     '''
