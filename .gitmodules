@@ -8,3 +8,6 @@
 [submodule "darkflow"]
 	path = darkflow
 	url = https://github.com/ArnholdInstitute/darkflow.git
+[submodule "retina_net"]
+	path = retina_net
+	url = https://github.com/lematt1991/retina_net.git
