@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import cv2, sys
 import os, json, argparse, pdb, numpy as np, pandas, time, importlib, psycopg2, boto3
 from shapely.geometry import MultiPolygon, box
 from subprocess import check_output
@@ -15,11 +16,10 @@ def get_results(args, model):
     all_predictions = []
     gt_boxes = json.load(open(args.test_boxes))
 
-    for _, predictions, truth in tqdm(model.predict_all(args.test_boxes, args.threshold), total=len(gt_boxes)):
+    for predictions in tqdm(model.predict_all(args.test_boxes), total=len(gt_boxes)):
         all_predictions.append(predictions)
 
     df = pandas.DataFrame(pandas.concat(all_predictions))
-    df.columns = ['x1', 'y1', 'x2', 'y2', 'score', 'image_id']
 
     recall, precision = precision_recall(gt_boxes, df)
 
@@ -81,7 +81,6 @@ def main():
     parser.add_argument('--test_boxes', required=True, help='Path to the JSON file containing the test set')
     parser.add_argument('--gpu', default=0)
     parser.add_argument('--weights', default=None, help='Path to weight file (default is in description.json)')
-    parser.add_argument('--threshold', default=0.5, type=float, help='Confidence threshold (default is in description.json)')
     args = parser.parse_args()
 
     os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu)
@@ -92,9 +91,10 @@ def main():
     model = None
     for model_type in MODELS:
         if model_type in args.weights:
+            sys.path.append(model_type)
             module = importlib.import_module(model_type)
             args.model_class = getattr(module, module.NAME)
-            model = args.model_class(args.weights)
+            model = args.model_class(args.weights, cuda=True)
             model_id = args.model_class.mk_hash(args.weights)
 
     if model is None:
