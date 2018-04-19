@@ -16,21 +16,22 @@ def get_results(args, model):
     all_predictions = []
     gt_boxes = json.load(open(args.test_boxes))
 
-    for predictions in tqdm(model.predict_all(args.test_boxes), total=len(gt_boxes)):
+    for predictions in tqdm(model.predict_all(args.test_boxes, batch_size=args.batch_size), total=len(gt_boxes)):
         all_predictions.append(predictions)
 
     df = pandas.DataFrame(pandas.concat(all_predictions))
 
     recall, precision = precision_recall(gt_boxes, df)
 
-    i = np.argmax(recall + precision)
-    f1 = 2 * (precision[i] * recall[i]) / (precision[i] + recall[i])
-    print('precision = %f, recall = %f, F1 = %f' % (precision[i], recall[i], f1))
+    f1 = 2 * (precision * recall) / (precision + recall)
+
+    i = np.nanargmax(f1)
+    print('precision = %f, recall = %f, F1 = %f' % (precision[i], recall[i], f1[i]))
 
     summary = {
         'precision' : precision[i],
         'recall' : recall[i],
-        'f1' : f1,
+        'f1' : f1[i],
         'threshold' : float(df.sort_values(by='score', ascending=False)['score'].values[i]),
         'name' : args.model_class.name,
         'id' : args.model_class.mk_hash(args.weights),
@@ -80,6 +81,7 @@ def main():
     parser = argparse.ArgumentParser()    
     parser.add_argument('--test_boxes', required=True, help='Path to the JSON file containing the test set')
     parser.add_argument('--gpu', default=0)
+    parser.add_argument('--batch_size', default=8, type=int, help='Batch size')
     parser.add_argument('--weights', default=None, help='Path to weight file (default is in description.json)')
     args = parser.parse_args()
 
