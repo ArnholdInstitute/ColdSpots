@@ -13,7 +13,8 @@ model = TensorBox()
 description = json.load(open('weights/tensorbox/description.json'))
 
 # Infer buildings
-result = model.predict_image(img, description['threshold'])
+result = model.predict_image(img)
+result = result[result.score > description['threshold']]
 
 orig = img.copy()
 
