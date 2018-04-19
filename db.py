@@ -1,6 +1,9 @@
-import psycopg2, os
+import psycopg2, os, warnings, pdb
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
+
+if find_dotenv() == '':
+    warnings.warn('You should probably have a .env file with database config arguments')
 
 aigh_db_args = {
     'dbname' : os.environ.get('AIGH_DATABASE', 'aigh'),
