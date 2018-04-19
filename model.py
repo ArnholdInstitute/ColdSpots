@@ -22,6 +22,7 @@ def get_best_model():
         name, instance, id, s3_loc = cur.fetchone()
         id = id.replace('-', '')
         if not os.path.exists(os.path.join('weights', id)):
+            if not os.path.exists('weights'): os.mkdir('weights')
             # Download weights
             print('Downloading weights for %s (%s)' % (name, id))
             s3 = boto3.resource('s3')
