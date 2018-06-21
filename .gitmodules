@@ -1,7 +1,7 @@
 [submodule "TensorBox"]
 	path = TensorBox
 	url = https://github.com/ArnholdInstitute/TensorBox.git
-	branch = master
+	branch = CleanVersion
 [submodule "faster_rcnn_pytorch"]
 	path = faster_rcnn_pytorch
 	url = https://github.com/ArnholdInstitute/faster_rcnn_pytorch.git

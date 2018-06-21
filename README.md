@@ -20,15 +20,34 @@ git clone --recursive https://github.com/ArnholdInstitute/ColdSpots.git
 ```
 virtualenv venv
 source venv/bin/activate
+
+
+
 pip install -r requirements.txt
+
+(^if the above gives you a certificate error execute
+curl https://bootstrap.pypa.io/get-pip.py | python)
+
+git submodule update --init --recursive
+
+
 ```
+
+
+
 
 ### Tensorbox
 
 Build the C++ auxilary functions:
 
 ```
-cd TensorBox/utils && make && cd ../../
+cd TensorBox/utils 
+make 
+make hungarian
+
+[^if the above throws an error, find the path of nsync_cv.h and nsync_mu.h inside the vent folder and find mutex.h ( should be at /venv/local/lib/python2.7/site-packages/tensorflow/include/tensorflow/core/platform/default or rather you can look at the error message). In the mutex.h folder you will see it says include nysnc_cv.h and nsync_mu.h. replace these with the appropriate file paths. then do make hungarian]
+
+
 ```
 
 If you want to run on a GPU, you'll also need to `pip install tensorflow-gpu`.
@@ -37,62 +56,19 @@ If you want to run on a GPU, you'll also need to `pip install tensorflow-gpu`.
 
 Below is an example of how to get the bounding boxes for each building within an image:
 
-```Python
-import pdb, json, cv2, numpy as np
-from scipy.misc import imread
-from TensorBox.predict import TensorBox
-
-# Read in image (RGB format)
-img = imread('data/liberia_sample_940.jpg')
-
-# Reconstruct the model
-description = json.load(open('weights/tensorbox/description.json'))
-model = TensorBox('weights/tensorbox/' + description['weights'])
-
-# Infer buildings
-result = model.predict_image(img, description['threshold'])
-
-orig = img.copy()
-
-# Plot the boxes on the original image
-for box in result.values[:, :4].round().astype(int):
-    cv2.rectangle(img, tuple(box[:2]), tuple(box[2:4]), (0,0,255))
-
-space = np.zeros([orig.shape[0], 5, 3])
-cv2.imwrite('with_annotated_buildings.jpg', np.concatenate([orig, space, img], axis=1))
+```
+python
+execfile("demo.py")
 ```
 
-![Imgur](https://i.imgur.com/6mgiIGo.jpg)
-
-
-# Evaluating models
-
-In order to evaluate the models provided in this repo, you'll need to create a JSON file describing your validation data.  The JSON file must have the following structure:
-
-```JSON
-[
-  {
-    "rects": [
-      {
-        "y1": <float>,
-        "x2": <float>,
-        "x1": <float>,
-        "y2": <float>
-      },
-      ...
-    ],
-    "image_path": <path to file>
-  },
-  ...
-]
-```
-
-Each entry in the array must have a field called `image_path` which is the relative path (from the JSON file) to the image.  `rects` contains the top left (`x1`, `y1`) coordinate and the bottom right (`x2`, `y2`) coordinate for the bounding box of each building in the provided satellite image.
-
-You can then evaluate a model by running the following command:
+# Training
 
 ```
-./evaluate.py --test_boxes <path to JSON file>  --model <model>
+python
+execfile("RunScript.py") 
 ```
+# Model Description
 
-Where model can be {`tensorbox`, `faster-rcnn`, `yolo`}
+```
+This model is very unexpected. First the image is passed through google_net. Then the output of the one of the earlier layers is taken and input into a 5 step multi-level RNN. The outputs are supposed to be potential location of boxes and also confidences. The loss function is the hungarian loss. One could look for reference to this here https://arxiv.org/pdf/1506.04878.pdf
+```
