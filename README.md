@@ -68,4 +68,4 @@ Below is an example of how to get the bounding boxes for each building within an
 # Model Description
 
 ```This model is very unexpected. First the image is passed through google_net. Then the output of the one of the earlier layers is taken and input into a 5 step multi-level RNN. The outputs are supposed to be potential location of boxes and also confidences. The loss function is the hungarian loss. One could look for reference to this here https://arxiv.org/pdf/1506.04878.pdf
-'''
+```
