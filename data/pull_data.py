@@ -4,7 +4,7 @@ import boto3
 bucket = 'dl-training-data'
 
 
-session = boto3.Session( aws_access_key_id=AK,aws_secret_access_key=SK)
+session = boto3.Session()
 s3 = session.resource('s3')
 
 #first download the training data
