@@ -1,9 +1,6 @@
 import pandas as pd
 import boto3
 
-
-AK = 'AKIAJIC5LRY3RFPYCK4A'
-SK = 'IW59lJSgT5y5jhJjiBwM4r6cFauV8wHYYNzPd+np'
 bucket = 'dl-training-data'
 
 
