@@ -1,5 +1,5 @@
 {
-  "_comment": "default arguments and hyperparameters file",
+  "_comment": "(default) arguments and hyperparameters file",
   "exp_name": "building_detection", 
   "deconv": false, 
   "lstm_size": 500, 

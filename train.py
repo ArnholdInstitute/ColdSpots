@@ -17,7 +17,7 @@ if __name__ == '__main__':
   os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
 
   if (args.training_data):
-    hyperparams["data"]['train_idl'] = os.path.join(args.root_dir, args.training_data)
+    hyperparams['data']['train_idl'] = os.path.join(args.root_dir, args.training_data)
   train.train(hyperparams, [])
 
 
